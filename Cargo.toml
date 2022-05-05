@@ -1,0 +1,8 @@
+[package]
+name = "rust-window_manager"
+version = "0.1.0"
+edition = "2021"
+
+[target.'cfg(windows)'.dependencies.winapi]
+winapi = "0.3.9"
+features = ["winuser", "libloaderapi"]
