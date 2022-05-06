@@ -1,5 +1,5 @@
 #[derive(Clone, Copy, Debug)]
-pub enum Screen {
+pub enum ScreenType {
 	Main
 }
 

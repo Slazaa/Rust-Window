@@ -1,6 +1,6 @@
 mod os;
 
-use crate::utils::{Screen, Position, Size};
+use crate::utils::{ScreenType, Position, Size};
 use crate::screen;
 
 #[cfg(unix)]
@@ -71,13 +71,13 @@ impl Window {
 			visible: false
 		};
 
-		let screen_size = screen::get_size(Screen::Main);
+		let screen_size = screen::get_size(ScreenType::Main);
 
 		window_builder.pos = Position::new(((screen_size.width - window_builder.size.width) / 2) as i32, ((screen_size.height - window_builder.size.height) / 2) as i32);
 		window_builder
 	}
 
-	pub fn handle(&mut self) -> &mut WindowHandle {
-		&mut self.handle
+	pub fn handle(&self) -> &WindowHandle {
+		&self.handle
 	}
 }

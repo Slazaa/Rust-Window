@@ -4,12 +4,12 @@ use winapi::um::winuser::{
 	GetSystemMetrics
 };
 
-use crate::utils::{Screen, Size};
+use crate::utils::{ScreenType, Size};
 
-pub fn get_size(flag: Screen) -> Size {
+pub fn get_size(flag: ScreenType) -> Size {
 	unsafe {
 		match flag {
-			Screen::Main => return Size::new(GetSystemMetrics(SM_CXSCREEN) as u32, GetSystemMetrics(SM_CYSCREEN) as u32)
+			ScreenType::Main => return Size::new(GetSystemMetrics(SM_CXSCREEN) as u32, GetSystemMetrics(SM_CYSCREEN) as u32)
 		}
 	}
 }

@@ -1,8 +1,8 @@
 mod os;
 
-use crate::utils::{Screen, Size};
+use crate::utils::{ScreenType, Size};
 
-pub fn get_size(screen: Screen) -> Size {
+pub fn get_size(screen: ScreenType) -> Size {
 	#[cfg(unix)]
 	return os::unix::get_size(screen);
 
