@@ -1,5 +1,6 @@
 mod os;
 
+use crate::event::Event;
 use crate::utils::{ScreenType, Position, Size};
 use crate::screen;
 
@@ -43,22 +44,21 @@ impl WindowBuilder {
 		self
 	}
 
-	pub fn build(&mut self) -> Result<Window, String> {
+	pub fn build(&mut self) -> Window {
 		#[cfg(unix)]
 		todo!();
 
 		#[cfg(windows)]
-		return Ok(Window {
-			handle: match os::windows::create_window(self.size, self.pos, self.title.as_str(), self.fullscreen, self.visible) {
-				Ok(x) => x,
-				Err(e) => return Err(e)
-			}
-		});
+		return Window {
+			handle: os::windows::create_window(self.size, self.pos, self.title.as_str(), self.fullscreen, self.visible),
+			open: true
+		};
 	}
 }
 
 pub struct Window {
-	handle: WindowHandle
+	handle: WindowHandle,
+	open: bool
 }
 
 impl Window {
@@ -77,7 +77,33 @@ impl Window {
 		window_builder
 	}
 
-	pub fn handle(&self) -> &WindowHandle {
-		&self.handle
+	pub fn handle(&self) -> WindowHandle {
+		self.handle
+	}
+
+	pub fn open(&self) -> bool {
+		self.open
+	}
+
+	pub fn close(&mut self) {
+		self.open = false;
+	}
+
+	pub fn poll_event(&self, event: &mut Event) -> bool {
+		#[cfg(unix)]
+		todo!();
+
+		#[cfg(windows)]
+		return os::windows::poll_event(self.handle, event);
+	}
+}
+
+impl Drop for Window {
+	fn drop(&mut self) {
+		#[cfg(unix)]
+		todo!();
+
+		#[cfg(windows)]
+		os::windows::destroy_window(self.handle);
 	}
 }
