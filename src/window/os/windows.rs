@@ -12,7 +12,8 @@ use winapi::{
 		},
 		windef::{
 			HBRUSH,
-			HWND
+			HWND,
+			RECT
 		},
 	},
 	um::{
@@ -24,6 +25,10 @@ use winapi::{
 			IDC_ARROW,
 			PM_REMOVE,
 			SW_SHOW,
+			SWP_NOMOVE,
+			SWP_NOSIZE,
+			SWP_NOZORDER,
+			SWP_SHOWWINDOW,
 			WM_CLOSE,
 			WM_CREATE,
 			WM_DESTROY,
@@ -36,12 +41,14 @@ use winapi::{
 			DestroyWindow,
 			DispatchMessageW,
 			GetWindowLongPtrW,
+			GetWindowRect,
 			LoadCursorW,
 			LoadIconW,
 			PeekMessageW,
 			PostQuitMessage,
 			RegisterClassExW,
 			SetWindowLongPtrW,
+			SetWindowPos,
 			ShowWindow,
 			TranslateMessage,
 			UpdateWindow
@@ -81,8 +88,7 @@ extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param:
 	}
 }
 
-// TODO: - Fullscreen
-pub fn create_window(size: Size, pos: Position, title: &str, fullscreen: bool, visible: bool) -> WindowHandle {
+pub fn create_window(size: Size, pos: Position, title: &str, fullscreen: bool) -> WindowHandle {
 	unsafe {
 		let class_name: Vec<u16> = to_wstring("WindowClass");
 		
@@ -103,7 +109,7 @@ pub fn create_window(size: Size, pos: Position, title: &str, fullscreen: bool, v
 
 		let title = to_wstring(title).as_ptr();
 		let lparam: *mut Event = Box::leak(Box::new(Event::None));
-		let hwnd = CreateWindowExW(
+		let h_wnd = CreateWindowExW(
 			0,
 			class_name.as_ptr(),
 			title, 
@@ -118,12 +124,14 @@ pub fn create_window(size: Size, pos: Position, title: &str, fullscreen: bool, v
 			lparam.cast()
 		);
 
-		if visible {
-			ShowWindow(hwnd, SW_SHOW);
-			UpdateWindow(hwnd);
+		ShowWindow(h_wnd, SW_SHOW);
+		UpdateWindow(h_wnd);
+
+		if fullscreen {
+			set_fullsreen(h_wnd, true);
 		}
 
-		hwnd
+		h_wnd
 	}
 }
 
@@ -133,6 +141,42 @@ pub fn destroy_window(handle: WindowHandle) {
 		Box::from_raw(ptr);
 
 		DestroyWindow(handle);
+	}
+}
+
+pub fn get_position(handle: WindowHandle) -> Position {
+	unsafe {
+		let mut rect: RECT = std::mem::zeroed();
+		GetWindowRect(handle, &mut rect);
+
+		Position::new(rect.left, rect.top)
+	}
+}
+
+pub fn get_size(handle: WindowHandle) -> Size {
+	unsafe {
+		let mut rect: RECT = std::mem::zeroed();
+		GetWindowRect(handle, &mut rect);
+
+		Size::new((rect.right - rect.left) as u32, (rect.bottom - rect.top) as u32)
+	}
+}
+
+pub fn set_position(handle: WindowHandle, pos: Position) {
+	unsafe {
+		SetWindowPos(handle, null_mut(), pos.x, pos.y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+	}
+}
+
+pub fn set_size(handle: WindowHandle, size: Size) {
+	unsafe {
+		SetWindowPos(handle, null_mut(), 0, 0, size.width as i32, size.height as i32, SWP_NOZORDER | SWP_NOMOVE | SWP_SHOWWINDOW);
+	}
+}
+
+pub fn set_fullsreen(handle: WindowHandle, toggle: bool) {
+	unsafe {
+		todo!();
 	}
 }
 

@@ -14,8 +14,7 @@ pub struct WindowBuilder {
 	size: Size,
 	pos: Position,
 	title: String,
-	fullscreen: bool,
-	visible: bool
+	fullscreen: bool
 }
 
 impl WindowBuilder {
@@ -39,18 +38,13 @@ impl WindowBuilder {
 		self
 	}
 
-	pub fn visible(&mut self) -> &mut Self {
-		self.visible = true;
-		self
-	}
-
 	pub fn build(&mut self) -> Window {
 		#[cfg(unix)]
 		todo!();
 
 		#[cfg(windows)]
 		return Window {
-			handle: os::windows::create_window(self.size, self.pos, self.title.as_str(), self.fullscreen, self.visible),
+			handle: os::windows::create_window(self.size, self.pos, self.title.as_str(), self.fullscreen),
 			open: true
 		};
 	}
@@ -67,8 +61,7 @@ impl Window {
 			size: Size::new(800, 600),
 			pos: Position::new(0, 0),
 			title: "My Window".to_owned(),
-			fullscreen: false,
-			visible: false
+			fullscreen: false
 		};
 
 		let screen_size = screen::get_size(ScreenType::Main);
@@ -81,12 +74,40 @@ impl Window {
 		self.handle
 	}
 
-	pub fn open(&self) -> bool {
-		self.open
+	pub fn pos(&self) -> Position {
+		#[cfg(unix)]
+		todo!();
+
+		#[cfg(windows)]
+		return os::windows::get_position(self.handle);
 	}
 
-	pub fn close(&mut self) {
-		self.open = false;
+	pub fn size(&self) -> Size {
+		#[cfg(unix)]
+		todo!();
+
+		#[cfg(windows)]
+		return os::windows::get_size(self.handle);
+	}
+
+	pub fn set_pos(&mut self, pos: Position) {
+		#[cfg(unix)]
+		todo!();
+
+		#[cfg(windows)]
+		os::windows::set_position(self.handle, pos);
+	}
+
+	pub fn set_size(&mut self, size: Size) {
+		#[cfg(unix)]
+		todo!();
+
+		#[cfg(windows)]
+		os::windows::set_size(self.handle, size);
+	}
+
+	pub fn open(&self) -> bool {
+		self.open
 	}
 
 	pub fn poll_event(&self, event: &mut Event) -> bool {
@@ -95,6 +116,10 @@ impl Window {
 
 		#[cfg(windows)]
 		return os::windows::poll_event(self.handle, event);
+	}
+
+	pub fn close(&mut self) {
+		self.open = false;
 	}
 }
 
