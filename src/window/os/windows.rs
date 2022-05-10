@@ -3,13 +3,7 @@ use std::ptr::{null_mut, null};
 use winapi::{
 	shared::{
 		basetsd::LONG_PTR,
-		minwindef::{
-			FALSE,
-			LPARAM,
-			LRESULT,
-			UINT,
-			WPARAM
-		},
+		minwindef::*,
 		windef::{
 			HBRUSH,
 			HWND,
@@ -18,41 +12,7 @@ use winapi::{
 	},
 	um::{
 		libloaderapi::GetModuleHandleW,
-		winuser::{
-			COLOR_WINDOW,
-			GWLP_USERDATA,
-			IDI_APPLICATION,
-			IDC_ARROW,
-			PM_REMOVE,
-			SW_SHOW,
-			SWP_NOMOVE,
-			SWP_NOSIZE,
-			SWP_NOZORDER,
-			SWP_SHOWWINDOW,
-			WM_CLOSE,
-			WM_CREATE,
-			WM_DESTROY,
-			WS_OVERLAPPEDWINDOW,
-			CREATESTRUCTW,
-			MSG,
-			WNDCLASSEXW,
-			CreateWindowExW,
-			DefWindowProcW,
-			DestroyWindow,
-			DispatchMessageW,
-			GetWindowLongPtrW,
-			GetWindowRect,
-			LoadCursorW,
-			LoadIconW,
-			PeekMessageW,
-			PostQuitMessage,
-			RegisterClassExW,
-			SetWindowLongPtrW,
-			SetWindowPos,
-			ShowWindow,
-			TranslateMessage,
-			UpdateWindow
-		}
+		winuser::*
 	}
 };
 
@@ -80,8 +40,24 @@ extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param:
 				let ptr = GetWindowLongPtrW(h_wnd, GWLP_USERDATA) as *mut Event;
 				*ptr = Event::Close;
 			}
+			WM_KEYDOWN => {
+				let ptr = GetWindowLongPtrW(h_wnd, GWLP_USERDATA) as *mut Event;
+				*ptr = Event::KeyDown(char::from_u32(w_param as u32).unwrap());
+			},
+			WM_KEYUP => {
+				let ptr = GetWindowLongPtrW(h_wnd, GWLP_USERDATA) as *mut Event;
+				*ptr = Event::KeyUp(char::from_u32(w_param as u32).unwrap());
+			},
 			WM_DESTROY => PostQuitMessage(0),
-			_ => return DefWindowProcW(h_wnd, msg, w_param, l_param)
+			_ => {
+				let ptr = GetWindowLongPtrW(h_wnd, GWLP_USERDATA) as *mut Event;
+				
+				if !ptr.is_null() {
+					*ptr = Event::None;
+				}
+
+				return DefWindowProcW(h_wnd, msg, w_param, l_param);
+			}
 		}
 
 		0
