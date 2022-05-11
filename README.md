@@ -1,4 +1,4 @@
-# Rust - Window Manager
+# Rust - Window
 A cross-platform window manager
 
 ## Featues
