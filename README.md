@@ -12,8 +12,8 @@ A cross-platform window manager
 
 ## Examples
 ```rs
-use window_manager::window::Window;
-use window_manager::event::Event;
+use window::window::Window;
+use window::event::Event;
 
 fn main() {
 	let mut window = Window::new() // Creates new window
