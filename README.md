@@ -16,16 +16,17 @@ use window_manager::window::Window;
 use window_manager::event::Event;
 
 fn main() {
-	let mut window = Window::new() // Create new window
+	let mut window = Window::new() // Creates new window
 		.title("Test")
 		.build();
 
-	while window.open() { // Keep the window open until it is manually closed
+	while window.open() { // Keeps the window open until it is manually closed
 		let mut event = Event::None;
 
-		while window.poll_event(&mut event) { // Processe every events on each frame
+		while window.poll_event(&mut event) { // Processes every events on each frame
 			match event {
-				Event::Close => window.close(), // Close the window if the close event is triggered
+				Event::KeyDown(key) => println!("'{}' has been pressed!", key), // Prints the key pressed
+				Event::Close => window.close(), // Closes the window if the close event is triggered
 				_ => ()
 			}
 		}
