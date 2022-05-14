@@ -65,7 +65,7 @@ extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param:
 	}
 }
 
-pub fn create_window(size: Size, pos: Position, title: &str, style: Style, context: bool) -> WindowHandle {
+pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> WindowHandle {
 	unsafe {
 		let class_name: Vec<u16> = to_wstring("WindowClass");
 		

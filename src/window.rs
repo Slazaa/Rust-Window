@@ -1,5 +1,6 @@
 mod os;
 
+use crate::context::{self, ContextHandle};
 use crate::event::Event;
 use crate::utils::{Position, Size};
 use crate::screen::{self, ScreenType};
@@ -73,18 +74,24 @@ impl WindowBuilder {
 
 	pub fn build(&mut self) -> Window {
 		#[cfg(unix)]
-		todo!();
+		let handle = os::unix::create_window(self.size, self.pos, self.title.as_str(), self.style);
 
 		#[cfg(windows)]
-		return Window {
-			handle: os::windows::create_window(self.size, self.pos, self.title.as_str(), self.style, self.context),
+		let handle = os::windows::create_window(self.size, self.pos, self.title.as_str(), self.style);
+
+		let context = context::create_context(handle);
+
+		Window {
+			handle,
+			context,
 			open: true
-		};
+		}
 	}
 }
 
 pub struct Window {
 	handle: WindowHandle,
+	context: ContextHandle,
 	open: bool
 }
 
@@ -106,6 +113,10 @@ impl Window {
 
 	pub fn handle(&self) -> WindowHandle {
 		self.handle
+	}
+
+	pub fn context(&self) -> ContextHandle {
+		self.context
 	}
 
 	pub fn pos(&self) -> Position {
