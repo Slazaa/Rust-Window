@@ -179,7 +179,7 @@ impl Drop for Window {
 		}
 
 		#[cfg(unix)]
-		todo!();
+		os::unix::destroy_window(self.handle);
 
 		#[cfg(windows)]
 		os::windows::destroy_window(self.handle);
