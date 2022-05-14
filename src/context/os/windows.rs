@@ -20,9 +20,9 @@ use winapi::{
 
 use crate::window::WindowHandle;
 
-pub type ContextHandle = HDC;
+pub type DeviceContextHandle = HDC;
 
-pub fn create_context(window_handle: WindowHandle) -> ContextHandle {
+pub fn create_context(window_handle: WindowHandle) -> DeviceContextHandle {
 	unsafe {
 		let mut pfd: PIXELFORMATDESCRIPTOR = std::mem::zeroed();
 
@@ -62,7 +62,7 @@ pub fn create_context(window_handle: WindowHandle) -> ContextHandle {
 	}
 }
 
-pub fn release_context(window_handle: WindowHandle, context_handle: ContextHandle) {
+pub fn release_context(window_handle: WindowHandle, context_handle: DeviceContextHandle) {
 	unsafe {
 		ReleaseDC(window_handle, context_handle);
 	}

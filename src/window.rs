@@ -1,6 +1,6 @@
 mod os;
 
-use crate::context::{self, ContextHandle};
+use crate::context::{self, DeviceContextHandle};
 use crate::event::Event;
 use crate::utils::{Position, Size};
 use crate::screen::{self, ScreenType};
@@ -95,7 +95,7 @@ impl WindowBuilder {
 
 pub struct Window {
 	handle: WindowHandle,
-	context: Option<ContextHandle>,
+	context: Option<DeviceContextHandle>,
 	open: bool
 }
 
@@ -119,7 +119,7 @@ impl Window {
 		self.handle
 	}
 
-	pub fn context(&self) -> Option<ContextHandle> {
+	pub fn context(&self) -> Option<DeviceContextHandle> {
 		self.context
 	}
 
