@@ -19,7 +19,7 @@ use crate::window::WindowHandle;
 
 pub type ContextHandle = HDC;
 
-pub fn create_context(handle: WindowHandle) -> ContextHandle {
+pub fn create_context(window_handle: WindowHandle) -> ContextHandle {
 	unsafe {
 		let mut pfd: PIXELFORMATDESCRIPTOR = std::mem::zeroed();
 
@@ -50,7 +50,7 @@ pub fn create_context(handle: WindowHandle) -> ContextHandle {
 		//pfd.dwVisibleMask = 0;
 		//pfd.dwDamageMask = 0;
 
-		let dc = GetDC(handle);
+		let dc = GetDC(window_handle);
 		let pixel_format = ChoosePixelFormat(dc, &pfd);
 
 		SetPixelFormat(dc, pixel_format, &pfd);
