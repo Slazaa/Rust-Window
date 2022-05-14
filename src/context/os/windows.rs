@@ -10,7 +10,10 @@ use winapi::{
 			ChoosePixelFormat,
 			SetPixelFormat
 		},
-		winuser::GetDC
+		winuser::{
+			GetDC,
+			ReleaseDC
+		}
 	},
 	shared::windef::HDC
 };
@@ -56,5 +59,11 @@ pub fn create_context(window_handle: WindowHandle) -> ContextHandle {
 		SetPixelFormat(dc, pixel_format, &pfd);
 
 		dc
+	}
+}
+
+pub fn release_context(window_handle: WindowHandle, context_handle: ContextHandle) {
+	unsafe {
+		ReleaseDC(window_handle, context_handle);
 	}
 }

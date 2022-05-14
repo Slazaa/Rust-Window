@@ -15,3 +15,11 @@ pub fn create_context(window_handle: WindowHandle) -> ContextHandle {
 	#[cfg(windows)]
 	return os::windows::create_context(window_handle);
 }
+
+pub fn release_context(window_handle: WindowHandle, context_handle: ContextHandle) {
+	#[cfg(unix)]
+	os::unix::release_context(window_handle, context_handle);
+
+	#[cfg(windows)]
+	os::windows::release_context(window_handle, context_handle);
+}

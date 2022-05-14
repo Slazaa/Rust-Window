@@ -79,7 +79,11 @@ impl WindowBuilder {
 		#[cfg(windows)]
 		let handle = os::windows::create_window(self.size, self.pos, self.title.as_str(), self.style);
 
-		let context = context::create_context(handle);
+		let mut context = None;
+
+		if self.context {
+			context = Some(context::create_context(handle));
+		}
 
 		Window {
 			handle,
@@ -91,7 +95,7 @@ impl WindowBuilder {
 
 pub struct Window {
 	handle: WindowHandle,
-	context: ContextHandle,
+	context: Option<ContextHandle>,
 	open: bool
 }
 
@@ -115,7 +119,7 @@ impl Window {
 		self.handle
 	}
 
-	pub fn context(&self) -> ContextHandle {
+	pub fn context(&self) -> Option<ContextHandle> {
 		self.context
 	}
 
@@ -170,6 +174,10 @@ impl Window {
 
 impl Drop for Window {
 	fn drop(&mut self) {
+		if let Some(context) = self.context {
+			context::release_context(self.handle, context);
+		}
+
 		#[cfg(unix)]
 		todo!();
 
