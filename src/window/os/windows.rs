@@ -16,8 +16,9 @@ use winapi::{
 	}
 };
 
-use crate::event::Event;
 use crate::utils::{Position, Size, to_wstring};
+use crate::event::Event;
+use crate::window::Style;
 
 pub type WindowHandle = HWND;
 
@@ -64,7 +65,7 @@ extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param:
 	}
 }
 
-pub fn create_window(size: Size, pos: Position, title: &str, fullscreen: bool) -> WindowHandle {
+pub fn create_window(size: Size, pos: Position, title: &str, style: Style, context: bool) -> WindowHandle {
 	unsafe {
 		let class_name: Vec<u16> = to_wstring("WindowClass");
 		
@@ -72,10 +73,13 @@ pub fn create_window(size: Size, pos: Position, title: &str, fullscreen: bool) -
 		let h_instance = GetModuleHandleW(null_mut());
 
 		wc.cbSize = std::mem::size_of::<WNDCLASSEXW>() as u32;
+		//wc.style = 0;
 		wc.lpfnWndProc = Some(window_proc);
+		//wc.cbClsExtra = 0;
+		//wc.cbWndExtra = 0;
 		wc.hInstance = h_instance;
-		wc.hIcon = LoadIconW(h_instance, IDI_APPLICATION);
-		wc.hCursor = LoadCursorW(h_instance, IDC_ARROW);
+		wc.hIcon = LoadIconW(null_mut(), IDI_APPLICATION);
+		wc.hCursor = LoadCursorW(null_mut(), IDC_ARROW);
 		wc.hbrBackground = (COLOR_WINDOW + 1) as HBRUSH;
 		wc.lpszMenuName = null();
 		wc.lpszClassName = class_name.as_ptr();
@@ -83,27 +87,60 @@ pub fn create_window(size: Size, pos: Position, title: &str, fullscreen: bool) -
 
 		RegisterClassExW(&wc);
 
+		let mut dw_style = 0;
+
+		if style.visible {
+			dw_style |= WS_VISIBLE;
+		}
+
+		if style.border {
+			dw_style |= WS_BORDER;
+		}
+
+		if style.titlebar {
+			dw_style |= WS_CAPTION;
+		}
+
+		if style.close {
+			dw_style |= WS_SYSMENU;
+		}
+
+		if style.maximize {
+			dw_style |= WS_MAXIMIZEBOX;
+		}
+
+		if style.minimize {
+			dw_style |= WS_MINIMIZEBOX;
+		}
+
+		if style.resize {
+			dw_style |= WS_SIZEBOX;
+		}
+
+		if style.fullscreen {
+			todo!();
+		}
+
 		let title = to_wstring(title).as_ptr();
 		let lparam: *mut Event = Box::leak(Box::new(Event::None));
 		let h_wnd = CreateWindowExW(
 			0,
 			class_name.as_ptr(),
 			title, 
-			WS_OVERLAPPEDWINDOW, 
+			dw_style, 
 			pos.x, 
 			pos.y, 
 			size.width as i32, 
 			size.height as i32, 
 			null_mut(), 
-			null_mut(), 
+			null_mut(),
 			h_instance,
 			lparam.cast()
 		);
 
-		ShowWindow(h_wnd, SW_SHOW);
 		UpdateWindow(h_wnd);
 
-		if fullscreen {
+		if style.fullscreen {
 			set_fullsreen(h_wnd, true);
 		}
 

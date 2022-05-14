@@ -1,6 +1,11 @@
 mod os;
 
-use crate::utils::{ScreenType, Size};
+use crate::utils::Size;
+
+#[derive(Clone, Copy, Debug)]
+pub enum ScreenType {
+	Main
+}
 
 pub fn get_size(screen: ScreenType) -> Size {
 	#[cfg(unix)]

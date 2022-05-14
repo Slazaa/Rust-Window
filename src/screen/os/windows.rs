@@ -4,7 +4,8 @@ use winapi::um::winuser::{
 	GetSystemMetrics
 };
 
-use crate::utils::{ScreenType, Size};
+use crate::utils::Size;
+use crate::screen::ScreenType;
 
 pub fn get_size(flag: ScreenType) -> Size {
 	unsafe {

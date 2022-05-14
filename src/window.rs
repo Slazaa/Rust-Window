@@ -1,8 +1,8 @@
 mod os;
 
 use crate::event::Event;
-use crate::utils::{ScreenType, Position, Size};
-use crate::screen;
+use crate::utils::{Position, Size};
+use crate::screen::{self, ScreenType};
 
 #[cfg(unix)]
 pub type WindowHandle = self::os::unix::WindowHandle;
@@ -10,11 +10,39 @@ pub type WindowHandle = self::os::unix::WindowHandle;
 #[cfg(windows)]
 pub type WindowHandle = self::os::windows::WindowHandle;
 
+#[derive(Copy, Clone)]
+pub struct Style {
+	pub visible: bool,
+	pub border: bool,
+	pub titlebar: bool,
+	pub close: bool,
+	pub maximize: bool,
+	pub minimize: bool,
+	pub resize: bool,
+	pub fullscreen: bool
+}
+
+impl Default for Style {
+	fn default() -> Self {
+		Self {
+			visible: true,
+			border: true,
+			titlebar: true,
+			close: true,
+			maximize: true,
+			minimize: true,
+			resize: false,
+			fullscreen: false
+		}
+	}
+}
+
 pub struct WindowBuilder {
 	size: Size,
 	pos: Position,
 	title: String,
-	fullscreen: bool
+	style: Style,
+	context: bool
 }
 
 impl WindowBuilder {
@@ -33,8 +61,13 @@ impl WindowBuilder {
 		self
 	}
 
-	pub fn fullscreen(&mut self) -> &mut Self {
-		self.fullscreen = true;
+	pub fn style(&mut self, style: Style) -> &mut Self {
+		self.style = style;
+		self
+	}
+
+	pub fn context(&mut self) -> &mut Self {
+		self.context = true;
 		self
 	}
 
@@ -44,7 +77,7 @@ impl WindowBuilder {
 
 		#[cfg(windows)]
 		return Window {
-			handle: os::windows::create_window(self.size, self.pos, self.title.as_str(), self.fullscreen),
+			handle: os::windows::create_window(self.size, self.pos, self.title.as_str(), self.style, self.context),
 			open: true
 		};
 	}
@@ -60,8 +93,9 @@ impl Window {
 		let mut window_builder = WindowBuilder { 
 			size: Size::new(800, 600),
 			pos: Position::new(0, 0),
-			title: "My Window".to_owned(),
-			fullscreen: false
+			title: "New Window".to_owned(),
+			style: Style::default(),
+			context: false
 		};
 
 		let screen_size = screen::get_size(ScreenType::Main);
