@@ -15,14 +15,17 @@ use winapi::{
 			ReleaseDC
 		}
 	},
-	shared::windef::HDC
+	shared::{
+		minwindef::FALSE,
+		windef::HDC
+	}
 };
 
 use crate::window::WindowHandle;
 
 pub type DeviceContextHandle = HDC;
 
-pub fn create_context(window_handle: WindowHandle) -> DeviceContextHandle {
+pub fn create_context(window_handle: WindowHandle) -> Result<DeviceContextHandle, String> {
 	unsafe {
 		let mut pfd: PIXELFORMATDESCRIPTOR = std::mem::zeroed();
 
@@ -54,11 +57,22 @@ pub fn create_context(window_handle: WindowHandle) -> DeviceContextHandle {
 		//pfd.dwDamageMask = 0;
 
 		let dc = GetDC(window_handle);
+
+		if dc.is_null() {
+			return Err("Failed to get device context".to_owned());
+		}
+
 		let pixel_format = ChoosePixelFormat(dc, &pfd);
 
-		SetPixelFormat(dc, pixel_format, &pfd);
+		if pixel_format == 0 {
+			return Err("Failed to choose pixel format".to_owned());
+		}
 
-		dc
+		if SetPixelFormat(dc, pixel_format, &pfd) == FALSE {
+			return Err("Failed to set pixel format".to_owned());
+		}
+
+		Ok(dc)
 	}
 }
 

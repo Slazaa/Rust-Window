@@ -72,24 +72,32 @@ impl WindowBuilder {
 		self
 	}
 
-	pub fn build(&mut self) -> Window {
+	pub fn build(&mut self) -> Result<Window, String> {
 		#[cfg(unix)]
 		let handle = os::unix::create_window(self.size, self.pos, self.title.as_str(), self.style);
 
 		#[cfg(windows)]
 		let handle = os::windows::create_window(self.size, self.pos, self.title.as_str(), self.style);
 
+		let handle = match handle {
+			Ok(x) => x,
+			Err(e) => return Err(e)
+		};
+
 		let mut context = None;
 
 		if self.context {
-			context = Some(context::create_context(handle));
+			context = Some(match context::create_context(handle) {
+				Ok(x) => x,
+				Err(e) => return Err(e)
+			});
 		}
 
-		Window {
+		Ok(Window {
 			handle,
 			context,
 			open: true
-		}
+		})
 	}
 }
 

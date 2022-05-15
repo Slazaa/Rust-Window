@@ -65,12 +65,16 @@ extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param:
 	}
 }
 
-pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> WindowHandle {
+pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Result<WindowHandle, String> {
 	unsafe {
 		let class_name: Vec<u16> = to_wstring("WindowClass");
 		
 		let mut wc: WNDCLASSEXW = std::mem::zeroed();
 		let h_instance = GetModuleHandleW(null_mut());
+
+		if h_instance.is_null() {
+			return Err("Failed to get module handle".to_owned());
+		}
 
 		wc.cbSize = std::mem::size_of::<WNDCLASSEXW>() as u32;
 		//wc.style = 0;
@@ -85,7 +89,9 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Wi
 		wc.lpszClassName = class_name.as_ptr();
 		wc.hIconSm = LoadIconW(h_instance, IDI_APPLICATION);
 
-		RegisterClassExW(&wc);
+		if RegisterClassExW(&wc) == 0 {
+			return Err("Failed to register window class".to_owned());
+		}
 
 		let mut dw_style = 0;
 
@@ -117,10 +123,6 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Wi
 			dw_style |= WS_SIZEBOX;
 		}
 
-		if style.fullscreen {
-			todo!();
-		}
-
 		let title = to_wstring(title).as_ptr();
 		let lparam: *mut Event = Box::leak(Box::new(Event::None));
 		let h_wnd = CreateWindowExW(
@@ -138,13 +140,17 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Wi
 			lparam.cast()
 		);
 
+		if h_wnd.is_null() {
+			return Err("Failed to create a window".to_owned()); 
+		}
+
 		UpdateWindow(h_wnd);
 
 		if style.fullscreen {
 			set_fullsreen(h_wnd, true);
 		}
 
-		h_wnd
+		Ok(h_wnd)
 	}
 }
 

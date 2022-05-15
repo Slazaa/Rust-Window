@@ -8,7 +8,7 @@ pub type DeviceContextHandle = self::os::unix::DeviceContextHandle;
 #[cfg(windows)]
 pub type DeviceContextHandle = self::os::windows::DeviceContextHandle;
 
-pub fn create_context(window_handle: WindowHandle) -> DeviceContextHandle {
+pub fn create_context(window_handle: WindowHandle) -> Result<DeviceContextHandle, String> {
 	#[cfg(unix)]
 	return os::unix::create_context(window_handle);
 
