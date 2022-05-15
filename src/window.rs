@@ -186,10 +186,14 @@ impl Drop for Window {
 			context::release_context(self.handle, context);
 		}
 
-		#[cfg(unix)]
-		os::unix::destroy_window(self.handle);
-
-		#[cfg(windows)]
-		os::windows::destroy_window(self.handle);
+		destroy_window(self.handle);
 	}
+}
+
+fn destroy_window(window_handle: WindowHandle) {
+	#[cfg(unix)]
+	os::unix::destroy_window(window_handle);
+
+	#[cfg(windows)]
+	os::windows::destroy_window(window_handle);
 }

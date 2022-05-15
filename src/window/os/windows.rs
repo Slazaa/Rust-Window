@@ -1,4 +1,5 @@
 use std::ptr::{null_mut, null};
+use std::ffi::CString;
 
 use winapi::{
 	shared::{
@@ -16,7 +17,7 @@ use winapi::{
 	}
 };
 
-use crate::utils::{Position, Size, to_wstring};
+use crate::utils::{Position, Size};
 use crate::event::Event;
 use crate::window::Style;
 
@@ -67,7 +68,7 @@ extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param:
 
 pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Result<WindowHandle, String> {
 	unsafe {
-		let class_name: Vec<u16> = to_wstring("WindowClass");
+		let class_name = CString::new("WindowClass".as_bytes()).unwrap();
 		
 		let mut wc: WNDCLASSEXW = std::mem::zeroed();
 		let h_instance = GetModuleHandleW(null_mut());
@@ -86,7 +87,7 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Re
 		wc.hCursor = LoadCursorW(null_mut(), IDC_ARROW);
 		wc.hbrBackground = (COLOR_WINDOW + 1) as HBRUSH;
 		wc.lpszMenuName = null();
-		wc.lpszClassName = class_name.as_ptr();
+		wc.lpszClassName = class_name.as_ptr() as *const u16;
 		wc.hIconSm = LoadIconW(h_instance, IDI_APPLICATION);
 
 		if RegisterClassExW(&wc) == 0 {
@@ -123,12 +124,12 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Re
 			dw_style |= WS_SIZEBOX;
 		}
 
-		let title = to_wstring(title).as_ptr();
+		let title = CString::new(title.as_bytes()).unwrap();
 		let lparam: *mut Event = Box::leak(Box::new(Event::None));
 		let h_wnd = CreateWindowExW(
 			0,
-			class_name.as_ptr(),
-			title, 
+			class_name.as_ptr() as *const u16,
+			title.as_ptr() as *const u16, 
 			dw_style, 
 			pos.x, 
 			pos.y, 
