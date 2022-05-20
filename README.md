@@ -10,6 +10,12 @@ A cross-platform window manager
 	- Position
 	- Size
 
+## How to install
+```toml
+[dependencies]
+window = { git = "https://github.com/Slazaa/Rust-Window" }
+```
+
 ## Examples
 ```rs
 use window::window::Window;
