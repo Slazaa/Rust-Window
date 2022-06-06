@@ -1,3 +1,8 @@
+#[derive(Clone, Copy)]
+pub enum Interface {
+    OpenGL
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Position {
 	pub x: i32,
@@ -26,4 +31,8 @@ impl Size {
 			height
 		}
 	}
+}
+
+pub fn to_wstring(string: &str) -> Vec<u16> {
+    string.encode_utf16().chain(Some(0)).collect()
 }

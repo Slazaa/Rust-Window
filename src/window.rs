@@ -2,7 +2,7 @@ mod os;
 
 use crate::context::{self, DeviceContextHandle};
 use crate::event::Event;
-use crate::utils::{Position, Size};
+use crate::utils::{Interface, Position, Size};
 use crate::screen::{self, ScreenType};
 
 #[cfg(unix)]
@@ -38,12 +38,17 @@ impl Default for Style {
 	}
 }
 
+pub struct DeviceContext {
+    pub handle: DeviceContextHandle,
+    pub interface: Interface
+}
+
 pub struct WindowBuilder {
 	size: Size,
 	pos: Position,
 	title: String,
 	style: Style,
-	context: bool
+	context_interface: Option<Interface>
 }
 
 impl WindowBuilder {
@@ -67,8 +72,8 @@ impl WindowBuilder {
 		self
 	}
 
-	pub fn context(&mut self) -> &mut Self {
-		self.context = true;
+	pub fn context(&mut self, interface: Interface) -> &mut Self {
+		self.context_interface = Some(interface);
 		self
 	}
 
@@ -86,10 +91,13 @@ impl WindowBuilder {
 
 		let mut context = None;
 
-		if self.context {
-			context = Some(match context::create_context(handle) {
-				Ok(x) => x,
-				Err(e) => return Err(e)
+		if let Some(interface) = self.context_interface {
+			context = Some(DeviceContext {
+                handle: match context::create_context(handle, interface) {
+                    Ok(x) => x,
+                    Err(e) => return Err(e)
+                },
+                interface
 			});
 		}
 
@@ -103,7 +111,7 @@ impl WindowBuilder {
 
 pub struct Window {
 	handle: WindowHandle,
-	context: Option<DeviceContextHandle>,
+	context: Option<DeviceContext>,
 	open: bool
 }
 
@@ -114,7 +122,7 @@ impl Window {
 			pos: Position::new(0, 0),
 			title: "New Window".to_owned(),
 			style: Style::default(),
-			context: false
+			context_interface: None
 		};
 
 		let screen_size = screen::get_size(ScreenType::Main);
@@ -127,8 +135,8 @@ impl Window {
 		self.handle
 	}
 
-	pub fn context(&self) -> Option<DeviceContextHandle> {
-		self.context
+	pub fn context(&self) -> &Option<DeviceContext> {
+		&self.context
 	}
 
 	pub fn pos(&self) -> Position {
@@ -182,18 +190,14 @@ impl Window {
 
 impl Drop for Window {
 	fn drop(&mut self) {
-		if let Some(context) = self.context {
-			context::release_context(self.handle, context);
+		if let Some(context) = &self.context {
+			context::release_context(self.handle, context.handle, context.interface);
 		}
 
-		destroy_window(self.handle);
+        #[cfg(unix)]
+        os::unix::destroy_window(self.handle);
+
+        #[cfg(windows)]
+        os::windows::destroy_window(self.handle);
 	}
-}
-
-fn destroy_window(window_handle: WindowHandle) {
-	#[cfg(unix)]
-	os::unix::destroy_window(window_handle);
-
-	#[cfg(windows)]
-	os::windows::destroy_window(window_handle);
 }

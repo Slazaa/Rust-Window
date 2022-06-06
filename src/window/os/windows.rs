@@ -17,7 +17,7 @@ use winapi::{
 	}
 };
 
-use crate::utils::{Position, Size};
+use crate::utils::{Position, Size, to_wstring};
 use crate::event::Event;
 use crate::window::Style;
 
@@ -124,7 +124,7 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Re
 			dw_style |= WS_SIZEBOX;
 		}
 
-		let title = CString::new(title.as_bytes()).unwrap();
+		let title = to_wstring(title);
 		let lparam: *mut Event = Box::leak(Box::new(Event::None));
 		let h_wnd = CreateWindowExW(
 			0,
