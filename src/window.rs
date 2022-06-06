@@ -6,10 +6,14 @@ use crate::utils::{Interface, Position, Size};
 use crate::screen::{self, ScreenType};
 
 #[cfg(unix)]
-pub type WindowHandle = self::os::unix::WindowHandle;
+use os::unix::*;
+#[cfg(unix)]
+pub use os::unix::WindowHandle;
 
 #[cfg(windows)]
-pub type WindowHandle = self::os::windows::WindowHandle;
+use os::windows::*;
+#[cfg(windows)]
+pub use os::windows::WindowHandle;
 
 #[derive(Copy, Clone)]
 pub struct Style {
@@ -78,11 +82,7 @@ impl WindowBuilder {
 	}
 
 	pub fn build(&mut self) -> Result<Window, String> {
-		#[cfg(unix)]
-		let handle = os::unix::create_window(self.size, self.pos, self.title.as_str(), self.style);
-
-		#[cfg(windows)]
-		let handle = os::windows::create_window(self.size, self.pos, self.title.as_str(), self.style);
+		let handle = create_window(self.size, self.pos, self.title.as_str(), self.style);
 
 		let handle = match handle {
 			Ok(x) => x,
@@ -143,35 +143,19 @@ impl Window {
 	}
 
 	pub fn pos(&self) -> Position {
-		#[cfg(unix)]
-		todo!();
-
-		#[cfg(windows)]
-		return os::windows::get_position(self.handle);
+		return get_position(self.handle);
 	}
 
 	pub fn size(&self) -> Size {
-		#[cfg(unix)]
-		todo!();
-
-		#[cfg(windows)]
-		return os::windows::get_size(self.handle);
+		return get_size(self.handle);
 	}
 
 	pub fn set_pos(&mut self, pos: Position) {
-		#[cfg(unix)]
-		todo!();
-
-		#[cfg(windows)]
-		os::windows::set_position(self.handle, pos);
+		set_position(self.handle, pos);
 	}
 
 	pub fn set_size(&mut self, size: Size) {
-		#[cfg(unix)]
-		todo!();
-
-		#[cfg(windows)]
-		os::windows::set_size(self.handle, size);
+		set_size(self.handle, size);
 	}
 
 	pub fn open(&self) -> bool {
@@ -179,11 +163,7 @@ impl Window {
 	}
 
 	pub fn poll_event(&self, event: &mut Event) -> bool {
-		#[cfg(unix)]
-		todo!();
-
-		#[cfg(windows)]
-		return os::windows::poll_event(self.handle, event);
+		return poll_event(self.handle, event);
 	}
 
 	pub fn close(&mut self) {
@@ -197,10 +177,6 @@ impl Drop for Window {
 			context::release_context(self.handle, context.handle, context.interface);
 		}
 
-        #[cfg(unix)]
-        os::unix::destroy_window(self.handle);
-
-        #[cfg(windows)]
-        os::windows::destroy_window(self.handle);
+        destroy_window(self.handle);
 	}
 }
