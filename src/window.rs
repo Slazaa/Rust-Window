@@ -135,8 +135,11 @@ impl Window {
 		self.handle
 	}
 
-	pub fn context(&self) -> &Option<DeviceContext> {
-		&self.context
+	pub fn context(&self) -> Option<&DeviceContext> {
+		match &self.context {
+            Some(x) => Some(&x),
+            None => None
+        }
 	}
 
 	pub fn pos(&self) -> Position {
