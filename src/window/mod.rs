@@ -1,19 +1,20 @@
-mod os;
+pub mod unix;
+pub mod windows;
 
-use crate::context::{self, DeviceContextHandle};
+#[cfg(unix)]
+use unix::*;
+#[cfg(unix)]
+pub use unix::WindowHandle;
+
+#[cfg(windows)]
+use windows::*;
+#[cfg(windows)]
+pub use windows::WindowHandle;
+
+use crate::context::*;
 use crate::event::Event;
 use crate::utils::{Interface, Position, Size};
 use crate::screen::{self, ScreenType};
-
-#[cfg(unix)]
-use os::unix::*;
-#[cfg(unix)]
-pub use os::unix::WindowHandle;
-
-#[cfg(windows)]
-use os::windows::*;
-#[cfg(windows)]
-pub use os::windows::WindowHandle;
 
 #[derive(Copy, Clone)]
 pub struct Style {
@@ -93,9 +94,11 @@ impl WindowBuilder {
 
 		if let Some(interface) = self.context_interface {
 			context = Some(DeviceContext {
-                handle: match context::create_context(handle, interface) {
-                    Ok(x) => x,
-                    Err(e) => return Err(e)
+                handle: match interface {
+                	Interface::OpenGL => match opengl::create_context(handle) {
+	                    Ok(x) => x,
+	                    Err(e) => return Err(e)
+	                }
                 },
                 interface
 			});
@@ -174,7 +177,9 @@ impl Window {
 impl Drop for Window {
 	fn drop(&mut self) {
 		if let Some(context) = &self.context {
-			context::release_context(self.handle, context.handle, context.interface);
+			match context.interface {
+				Interface::OpenGL => opengl::release_context(self.handle, context.handle)
+			}
 		}
 
         destroy_window(self.handle);

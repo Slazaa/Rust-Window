@@ -1,10 +1,11 @@
-mod os;
+pub mod unix;
+pub mod windows;
 
 #[cfg(unix)]
-pub use os::unix::*;
+pub use unix::*;
 
 #[cfg(windows)]
-pub use os::windows::*;
+pub use windows::*;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ScreenType {

@@ -194,10 +194,8 @@ pub fn set_size(handle: WindowHandle, size: Size) {
 	}
 }
 
-pub fn set_fullsreen(handle: WindowHandle, toggle: bool) {
-	unsafe {
-		todo!();
-	}
+pub fn set_fullsreen(_handle: WindowHandle, _toggle: bool) {
+	todo!();
 }
 
 pub fn poll_event(handle: WindowHandle, event: &mut Event) -> bool {
