@@ -1,6 +1,6 @@
 #[derive(Clone, Copy)]
 pub enum Interface {
-    OpenGL
+	OpenGL
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -34,5 +34,5 @@ impl Size {
 }
 
 pub fn to_wstring(string: &str) -> Vec<u16> {
-    string.encode_utf16().chain(Some(0)).collect()
+	string.encode_utf16().chain(Some(0)).collect()
 }

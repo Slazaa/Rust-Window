@@ -44,8 +44,8 @@ impl Default for Style {
 }
 
 pub struct DeviceContext {
-    pub handle: DeviceContextHandle,
-    pub interface: Interface
+	pub handle: DeviceContextHandle,
+	pub interface: Interface
 }
 
 pub struct WindowBuilder {
@@ -94,13 +94,13 @@ impl WindowBuilder {
 
 		if let Some(interface) = self.context_interface {
 			context = Some(DeviceContext {
-                handle: match interface {
-                	Interface::OpenGL => match opengl::create_context(handle) {
-	                    Ok(x) => x,
-	                    Err(e) => return Err(e)
-	                }
-                },
-                interface
+				handle: match interface {
+					Interface::OpenGL => match opengl::create_context(handle) {
+						Ok(x) => x,
+						Err(e) => return Err(e)
+					}
+				},
+				interface
 			});
 		}
 
@@ -140,9 +140,9 @@ impl Window {
 
 	pub fn context(&self) -> Option<&DeviceContext> {
 		match &self.context {
-            Some(x) => Some(&x),
-            None => None
-        }
+			Some(x) => Some(&x),
+			None => None
+		}
 	}
 
 	pub fn pos(&self) -> Position {
@@ -182,6 +182,6 @@ impl Drop for Window {
 			}
 		}
 
-        destroy_window(self.handle);
+		destroy_window(self.handle);
 	}
 }
