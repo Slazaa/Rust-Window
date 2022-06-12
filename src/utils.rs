@@ -1,8 +1,3 @@
-#[derive(Clone, Copy)]
-pub enum Interface {
-	OpenGL
-}
-
 #[derive(Clone, Copy, Debug)]
 pub struct Position {
 	pub x: i32,

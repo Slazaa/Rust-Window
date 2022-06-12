@@ -11,9 +11,8 @@ use windows::*;
 #[cfg(windows)]
 pub use windows::WindowHandle;
 
-use crate::context::*;
 use crate::event::Event;
-use crate::utils::{Interface, Position, Size};
+use crate::utils::{Position, Size};
 use crate::screen::{self, ScreenType};
 
 #[derive(Copy, Clone)]
@@ -43,17 +42,11 @@ impl Default for Style {
 	}
 }
 
-pub struct DeviceContext {
-	pub handle: DeviceContextHandle,
-	pub interface: Interface
-}
-
 pub struct WindowBuilder {
 	size: Size,
 	pos: Position,
 	title: String,
-	style: Style,
-	context_interface: Option<Interface>
+	style: Style
 }
 
 impl WindowBuilder {
@@ -77,11 +70,6 @@ impl WindowBuilder {
 		self
 	}
 
-	pub fn context(&mut self, interface: Interface) -> &mut Self {
-		self.context_interface = Some(interface);
-		self
-	}
-
 	pub fn build(&mut self) -> Result<Window, String> {
 		let handle = create_window(self.size, self.pos, self.title.as_str(), self.style);
 
@@ -90,23 +78,8 @@ impl WindowBuilder {
 			Err(e) => return Err(e)
 		};
 
-		let mut context = None;
-
-		if let Some(interface) = self.context_interface {
-			context = Some(DeviceContext {
-				handle: match interface {
-					Interface::OpenGL => match opengl::create_context(handle) {
-						Ok(x) => x,
-						Err(e) => return Err(e)
-					}
-				},
-				interface
-			});
-		}
-
 		Ok(Window {
 			handle,
-			context,
 			open: true
 		})
 	}
@@ -114,7 +87,6 @@ impl WindowBuilder {
 
 pub struct Window {
 	handle: WindowHandle,
-	context: Option<DeviceContext>,
 	open: bool
 }
 
@@ -124,8 +96,7 @@ impl Window {
 			size: Size::new(800, 600),
 			pos: Position::new(0, 0),
 			title: "New Window".to_owned(),
-			style: Style::default(),
-			context_interface: None
+			style: Style::default()
 		};
 
 		let screen_size = screen::get_size(ScreenType::Main);
@@ -136,13 +107,6 @@ impl Window {
 
 	pub fn handle(&self) -> WindowHandle {
 		self.handle
-	}
-
-	pub fn context(&self) -> Option<&DeviceContext> {
-		match &self.context {
-			Some(x) => Some(&x),
-			None => None
-		}
 	}
 
 	pub fn pos(&self) -> Position {
@@ -176,12 +140,6 @@ impl Window {
 
 impl Drop for Window {
 	fn drop(&mut self) {
-		if let Some(context) = &self.context {
-			match context.interface {
-				Interface::OpenGL => opengl::release_context(self.handle, context.handle)
-			}
-		}
-
 		destroy_window(self.handle);
 	}
 }

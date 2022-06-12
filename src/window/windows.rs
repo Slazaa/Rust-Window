@@ -1,15 +1,10 @@
 use std::ptr::{null_mut, null};
-use std::ffi::CString;
 
 use winapi::{
 	shared::{
 		basetsd::LONG_PTR,
 		minwindef::*,
-		windef::{
-			HBRUSH,
-			HWND,
-			RECT
-		},
+		windef::{HBRUSH, HWND, RECT},
 	},
 	um::{
 		libloaderapi::GetModuleHandleW,
@@ -22,6 +17,8 @@ use crate::event::Event;
 use crate::window::Style;
 
 pub type WindowHandle = HWND;
+
+const WINDOW_CLASS_NAME: &str = "WindowClass";
 
 extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
 	unsafe {
@@ -68,7 +65,7 @@ extern "system" fn window_proc(h_wnd: HWND, msg: UINT, w_param: WPARAM, l_param:
 
 pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Result<WindowHandle, String> {
 	unsafe {
-		let class_name = CString::new("WindowClass".as_bytes()).unwrap();
+		let class_name = to_wstring(WINDOW_CLASS_NAME);
 		
 		let mut wc: WNDCLASSEXW = std::mem::zeroed();
 		let h_instance = GetModuleHandleW(null_mut());
@@ -126,6 +123,7 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Re
 
 		let title = to_wstring(title);
 		let lparam: *mut Event = Box::leak(Box::new(Event::None));
+
 		let h_wnd = CreateWindowExW(
 			0,
 			class_name.as_ptr() as *const u16,
@@ -144,8 +142,6 @@ pub fn create_window(size: Size, pos: Position, title: &str, style: Style) -> Re
 		if h_wnd.is_null() {
 			return Err("Failed to create a window".to_owned()); 
 		}
-
-		UpdateWindow(h_wnd);
 
 		if style.fullscreen {
 			set_fullsreen(h_wnd, true);
@@ -183,15 +179,11 @@ pub fn get_size(handle: WindowHandle) -> Size {
 }
 
 pub fn set_position(handle: WindowHandle, pos: Position) {
-	unsafe {
-		SetWindowPos(handle, null_mut(), pos.x, pos.y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-	}
+	unsafe { SetWindowPos(handle, null_mut(), pos.x, pos.y, 0, 0, SWP_NOZORDER | SWP_NOSIZE); }
 }
 
 pub fn set_size(handle: WindowHandle, size: Size) {
-	unsafe {
-		SetWindowPos(handle, null_mut(), 0, 0, size.width as i32, size.height as i32, SWP_NOZORDER | SWP_NOMOVE | SWP_SHOWWINDOW);
-	}
+	unsafe { SetWindowPos(handle, null_mut(), 0, 0, size.width as i32, size.height as i32, SWP_NOZORDER | SWP_NOMOVE | SWP_SHOWWINDOW); }
 }
 
 pub fn set_fullsreen(_handle: WindowHandle, _toggle: bool) {
