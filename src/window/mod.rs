@@ -125,7 +125,7 @@ impl Window {
 		set_size(self.handle, size);
 	}
 
-	pub fn open(&self) -> bool {
+	pub fn is_open(&self) -> bool {
 		self.open
 	}
 
